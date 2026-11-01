@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Charging Sound</string>
+    <string name="fgs_subtype">Listens for the charger-connected system broadcast, which cannot be received by a manifest receiver.</string>
+
+    <string name="notif_channel">Charging sound service</string>
+    <string name="notif_title">Charging Sound is active</string>
+    <string name="notif_text">Waiting for a charger</string>
+
+    <string name="enable_label">Play a sound when a charger is connected</string>
+    <string name="sound_heading">Sound</string>
+    <string name="sound_default">System default notification sound</string>
+    <string name="sound_random_hint">One of the checked sounds is played at random. With none checked, the default sound plays.</string>
+    <string name="play_sound">Play</string>
+    <string name="choose_sound">Add sounds</string>
+    <string name="remove_sound">Remove</string>
+    <string name="use_default">Clear all</string>
+    <string name="test_sound">Test</string>
+
+    <string name="setup_heading">Keep it running</string>
+    <string name="status_ok">OK</string>
+    <string name="status_missing">Not set</string>
+    <string name="status_unknown">Unknown</string>
+    <string name="status_manual">Check manually</string>
+    <string name="open">Open</string>
+
+    <string name="notif_perm_title">Notifications</string>
+    <string name="notif_perm_detail">Needed to show the service notification. The sound still plays without it, but the system may stop the service sooner.</string>
+    <string name="battery_title">Battery optimization</string>
+    <string name="battery_detail">Allow the app to run in the background without restrictions.</string>
+
+    <string name="xiaomi_heading">Xiaomi, Redmi and POCO</string>
+    <string name="autostart_title">Autostart</string>
+    <string name="autostart_detail">Turn Autostart on for Charging Sound so it can start after a reboot or after being stopped.</string>
+    <string name="miui_battery_title">Battery saver</string>
+    <string name="miui_battery_detail">Set Charging Sound to "No restrictions".</string>
+    <string name="recents_title">Lock in recents</string>
+    <string name="recents_detail">Open the recent apps screen, long-press the Charging Sound card and choose the lock icon. This cannot be opened or checked from the app.</string>
+</resources>
