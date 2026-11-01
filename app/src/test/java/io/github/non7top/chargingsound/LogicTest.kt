@@ -5,6 +5,7 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
+import kotlin.random.Random
 
 class LogicTest {
     @Test
@@ -39,18 +40,34 @@ class LogicTest {
     }
 
     @Test
-    fun resolveSourceUsesDefaultWhenNothingSaved() {
-        assertEquals(SoundSource.Default, resolveSource(null) { true })
-        assertEquals(SoundSource.Default, resolveSource("  ") { true })
+    fun pickSourceUsesDefaultWhenNothingSaved() {
+        assertEquals(SoundSource.Default, pickSource(emptyList()) { true })
+        assertEquals(SoundSource.Default, pickSource(listOf("  ")) { true })
     }
 
     @Test
-    fun resolveSourceFallsBackWhenFileCannotBeOpened() {
-        assertEquals(SoundSource.Default, resolveSource("content://x/1") { false })
+    fun pickSourceFallsBackWhenNoFileCanBeOpened() {
+        assertEquals(SoundSource.Default, pickSource(listOf("content://x/1", "content://x/2")) { false })
     }
 
     @Test
-    fun resolveSourceUsesSavedUriWhenOpenable() {
-        assertEquals(SoundSource.Custom("content://x/1"), resolveSource("content://x/1") { true })
+    fun pickSourceUsesSingleOpenableUri() {
+        assertEquals(SoundSource.Custom("content://x/1"), pickSource(listOf("content://x/1")) { true })
+    }
+
+    @Test
+    fun pickSourceSkipsUnopenableUris() {
+        val saved = listOf("content://x/1", "content://x/2", "content://x/3")
+        repeat(50) {
+            assertEquals(SoundSource.Custom("content://x/2"), pickSource(saved) { it == "content://x/2" })
+        }
+    }
+
+    @Test
+    fun pickSourceChoosesAmongAllOpenableUris() {
+        val saved = listOf("content://x/1", "content://x/2", "content://x/3")
+        val random = Random(42)
+        val seen = (1..200).map { (pickSource(saved, random) { true } as SoundSource.Custom).uri }.toSet()
+        assertEquals(saved.toSet(), seen)
     }
 }

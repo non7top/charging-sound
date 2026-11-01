@@ -3,6 +3,7 @@ package io.github.non7top.chargingsound
 
 import android.app.Activity
 import android.content.Intent
+import android.content.res.Configuration
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
@@ -19,7 +20,7 @@ import android.widget.TextView
 class MainActivity : Activity() {
     private lateinit var prefs: Prefs
     private lateinit var enableSwitch: Switch
-    private lateinit var soundLabel: TextView
+    private lateinit var soundList: LinearLayout
     private lateinit var checklist: LinearLayout
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -37,17 +38,20 @@ class MainActivity : Activity() {
     @Deprecated("Deprecated in Java")
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-        val uri = data?.data
-        if (requestCode == REQUEST_PICK_SOUND && resultCode == RESULT_OK && uri != null) {
+        if (requestCode != REQUEST_PICK_SOUND || resultCode != RESULT_OK || data == null) return
+        val picked = data.clipData?.let { clip -> (0 until clip.itemCount).map { clip.getItemAt(it).uri } }
+            ?: listOfNotNull(data.data)
+        val saved = prefs.soundUris.toMutableList()
+        for (uri in picked) {
             try {
                 contentResolver.takePersistableUriPermission(uri, Intent.FLAG_GRANT_READ_URI_PERMISSION)
             } catch (e: SecurityException) {
-                return
+                continue
             }
-            releaseSavedGrant()
-            prefs.soundUri = uri.toString()
-            refresh()
+            if (uri.toString() !in saved) saved.add(uri.toString())
         }
+        prefs.soundUris = saved
+        refresh()
     }
 
     @Deprecated("Deprecated in Java")
@@ -69,8 +73,8 @@ class MainActivity : Activity() {
         root.addView(enableSwitch)
 
         root.addView(heading(R.string.sound_heading))
-        soundLabel = TextView(this)
-        root.addView(soundLabel)
+        soundList = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
+        root.addView(soundList)
         val soundButtons = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL }
         soundButtons.addView(button(R.string.choose_sound) { pickSound() })
         soundButtons.addView(button(R.string.use_default) { useDefaultSound() })
@@ -92,7 +96,14 @@ class MainActivity : Activity() {
         enableSwitch.isChecked = prefs.enabled
         enableSwitch.setOnCheckedChangeListener { _, checked -> setEnabled(checked) }
 
-        soundLabel.text = prefs.soundUri?.let { displayName(Uri.parse(it)) } ?: getString(R.string.sound_default)
+        soundList.removeAllViews()
+        val sounds = prefs.soundUris
+        if (sounds.isEmpty()) {
+            soundList.addView(TextView(this).apply { setText(R.string.sound_default) })
+        } else {
+            sounds.forEach { soundList.addView(soundRow(it)) }
+            if (sounds.size > 1) soundList.addView(TextView(this).apply { setText(R.string.sound_random_hint) })
+        }
 
         checklist.removeAllViews()
         Persistence.genericItems(this).forEach { checklist.addView(row(it)) }
@@ -111,23 +122,39 @@ class MainActivity : Activity() {
         val intent = Intent(Intent.ACTION_OPEN_DOCUMENT)
             .addCategory(Intent.CATEGORY_OPENABLE)
             .setType("audio/*")
+            .putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true)
         @Suppress("DEPRECATION")
         startActivityForResult(intent, REQUEST_PICK_SOUND)
     }
 
     private fun useDefaultSound() {
-        releaseSavedGrant()
-        prefs.soundUri = null
+        prefs.soundUris.forEach { releaseGrant(it) }
+        prefs.soundUris = emptyList()
         refresh()
     }
 
-    private fun releaseSavedGrant() {
-        val saved = prefs.soundUri ?: return
+    private fun removeSound(uri: String) {
+        releaseGrant(uri)
+        prefs.soundUris = prefs.soundUris - uri
+        refresh()
+    }
+
+    private fun releaseGrant(uri: String) {
         try {
-            contentResolver.releasePersistableUriPermission(Uri.parse(saved), Intent.FLAG_GRANT_READ_URI_PERMISSION)
+            contentResolver.releasePersistableUriPermission(Uri.parse(uri), Intent.FLAG_GRANT_READ_URI_PERMISSION)
         } catch (e: SecurityException) {
             // Grant was already gone.
         }
+    }
+
+    private fun soundRow(uri: String): View {
+        val row = LinearLayout(this).apply {
+            orientation = LinearLayout.HORIZONTAL
+            gravity = Gravity.CENTER_VERTICAL
+        }
+        row.addView(TextView(this).apply { text = displayName(Uri.parse(uri)) }, LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f))
+        row.addView(button(R.string.remove_sound) { removeSound(uri) })
+        return row
     }
 
     private fun displayName(uri: Uri): String = try {
@@ -164,6 +191,7 @@ class MainActivity : Activity() {
         box.addView(TextView(this).apply {
             text = "${getString(item.title)}: ${getString(statusText)}"
             textSize = 16f
+            if (item.status == Status.OK) setTextColor(okColor())
         })
         box.addView(TextView(this).apply { setText(item.detail) })
         item.action?.let { action ->
@@ -172,6 +200,11 @@ class MainActivity : Activity() {
             })
         }
         return box
+    }
+
+    private fun okColor(): Int {
+        val night = resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK == Configuration.UI_MODE_NIGHT_YES
+        return if (night) 0xFF66BB6A.toInt() else 0xFF2E7D32.toInt()
     }
 
     private fun heading(text: Int) = TextView(this).apply {

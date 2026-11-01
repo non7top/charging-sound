@@ -11,8 +11,8 @@
 
 | File | Role |
 |---|---|
-| `Prefs.kt` | `SharedPreferences` wrapper: `enabled`, `soundUri`, notification-permission flag. |
-| `Logic.kt` | Pure functions: `isXiaomiFamily`, `Debouncer`, `resolveSource`. Unit tested. |
+| `Prefs.kt` | `SharedPreferences` wrapper: `enabled`, `soundUris` (list), notification-permission flag. |
+| `Logic.kt` | Pure functions: `isXiaomiFamily`, `Debouncer`, `pickSource` (random pick among usable sounds). Unit tested. |
 | `SoundPlayer.kt` | Resolves the source, plays it with `MediaPlayer`, releases on completion. |
 | `ChargerService.kt` | Foreground service; registers the `POWER_CONNECTED` receiver; applies debounce; calls `SoundPlayer`. |
 | `BootReceiver.kt` | Starts the service after boot or app update if enabled. |

@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: Apache-2.0
 package io.github.non7top.chargingsound
 
+import kotlin.random.Random
+
 private val XIAOMI_NAMES = listOf("xiaomi", "redmi", "poco")
 
 fun isXiaomiFamily(manufacturer: String?, brand: String?): Boolean =
@@ -25,5 +27,8 @@ sealed class SoundSource {
     data class Custom(val uri: String) : SoundSource()
 }
 
-fun resolveSource(savedUri: String?, canOpen: (String) -> Boolean): SoundSource =
-    if (!savedUri.isNullOrBlank() && canOpen(savedUri)) SoundSource.Custom(savedUri) else SoundSource.Default
+/** Picks a random saved sound that can still be opened; the default sound when none can. */
+fun pickSource(saved: List<String>, random: Random = Random.Default, canOpen: (String) -> Boolean): SoundSource {
+    val uri = saved.filter { it.isNotBlank() }.shuffled(random).firstOrNull(canOpen)
+    return if (uri != null) SoundSource.Custom(uri) else SoundSource.Default
+}

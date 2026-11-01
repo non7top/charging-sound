@@ -13,8 +13,7 @@ class SoundPlayer(private val context: Context) {
 
     fun play() {
         stop()
-        val saved = Prefs(context).soundUri
-        val source = resolveSource(saved) { canOpen(Uri.parse(it)) }
+        val source = pickSource(Prefs(context).soundUris) { canOpen(Uri.parse(it)) }
         val defaultUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
         when (source) {
             is SoundSource.Custom -> if (!start(Uri.parse(source.uri))) start(defaultUri)

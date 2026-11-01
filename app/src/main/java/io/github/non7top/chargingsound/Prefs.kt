@@ -10,9 +10,10 @@ class Prefs(context: Context) {
         get() = sp.getBoolean("enabled", false)
         set(value) = sp.edit().putBoolean("enabled", value).apply()
 
-    var soundUri: String?
-        get() = sp.getString("sound_uri", null)
-        set(value) = sp.edit().putString("sound_uri", value).apply()
+    var soundUris: List<String>
+        get() = (sp.getString("sound_uris", null) ?: sp.getString("sound_uri", null) ?: "")
+            .split('\n').filter { it.isNotBlank() }
+        set(value) = sp.edit().putString("sound_uris", value.joinToString("\n")).remove("sound_uri").apply()
 
     var notificationPermissionAsked: Boolean
         get() = sp.getBoolean("notif_asked", false)
