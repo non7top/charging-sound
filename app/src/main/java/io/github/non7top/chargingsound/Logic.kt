@@ -27,6 +27,8 @@ sealed class SoundSource {
     data class Custom(val uri: String) : SoundSource()
 }
 
+fun activeSounds(saved: List<String>, disabled: Set<String>): List<String> = saved.filter { it !in disabled }
+
 /** Picks a random saved sound that can still be opened; the default sound when none can. */
 fun pickSource(saved: List<String>, random: Random = Random.Default, canOpen: (String) -> Boolean): SoundSource {
     val uri = saved.filter { it.isNotBlank() }.shuffled(random).firstOrNull(canOpen)

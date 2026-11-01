@@ -12,6 +12,7 @@ import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
+import android.widget.CheckBox
 import android.widget.LinearLayout
 import android.widget.ScrollView
 import android.widget.Switch
@@ -21,12 +22,19 @@ class MainActivity : Activity() {
     private lateinit var prefs: Prefs
     private lateinit var enableSwitch: Switch
     private lateinit var soundList: LinearLayout
+    private lateinit var player: SoundPlayer
     private lateinit var checklist: LinearLayout
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         prefs = Prefs(this)
+        player = SoundPlayer(this)
         setContentView(buildUi())
+    }
+
+    override fun onPause() {
+        super.onPause()
+        player.stop()
     }
 
     override fun onResume() {
@@ -78,7 +86,7 @@ class MainActivity : Activity() {
         val soundButtons = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL }
         soundButtons.addView(button(R.string.choose_sound) { pickSound() })
         soundButtons.addView(button(R.string.use_default) { useDefaultSound() })
-        soundButtons.addView(button(R.string.test_sound) { SoundPlayer(this).play() })
+        soundButtons.addView(button(R.string.test_sound) { player.play() })
         root.addView(soundButtons)
 
         root.addView(heading(R.string.setup_heading))
@@ -102,7 +110,7 @@ class MainActivity : Activity() {
             soundList.addView(TextView(this).apply { setText(R.string.sound_default) })
         } else {
             sounds.forEach { soundList.addView(soundRow(it)) }
-            if (sounds.size > 1) soundList.addView(TextView(this).apply { setText(R.string.sound_random_hint) })
+            soundList.addView(TextView(this).apply { setText(R.string.sound_random_hint) })
         }
 
         checklist.removeAllViews()
@@ -130,12 +138,14 @@ class MainActivity : Activity() {
     private fun useDefaultSound() {
         prefs.soundUris.forEach { releaseGrant(it) }
         prefs.soundUris = emptyList()
+        prefs.disabledSounds = emptySet()
         refresh()
     }
 
     private fun removeSound(uri: String) {
         releaseGrant(uri)
         prefs.soundUris = prefs.soundUris - uri
+        prefs.disabledSounds = prefs.disabledSounds - uri
         refresh()
     }
 
@@ -152,7 +162,15 @@ class MainActivity : Activity() {
             orientation = LinearLayout.HORIZONTAL
             gravity = Gravity.CENTER_VERTICAL
         }
-        row.addView(TextView(this).apply { text = displayName(Uri.parse(uri)) }, LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f))
+        val check = CheckBox(this).apply {
+            text = displayName(Uri.parse(uri))
+            isChecked = uri !in prefs.disabledSounds
+            setOnCheckedChangeListener { _, checked ->
+                prefs.disabledSounds = if (checked) prefs.disabledSounds - uri else prefs.disabledSounds + uri
+            }
+        }
+        row.addView(check, LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f))
+        row.addView(button(R.string.play_sound) { player.preview(uri) })
         row.addView(button(R.string.remove_sound) { removeSound(uri) })
         return row
     }

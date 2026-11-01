@@ -15,6 +15,11 @@ class Prefs(context: Context) {
             .split('\n').filter { it.isNotBlank() }
         set(value) = sp.edit().putString("sound_uris", value.joinToString("\n")).remove("sound_uri").apply()
 
+    /** Saved sounds the user unchecked: kept in the list but never picked. */
+    var disabledSounds: Set<String>
+        get() = (sp.getString("sound_disabled", null) ?: "").split('\n').filter { it.isNotBlank() }.toSet()
+        set(value) = sp.edit().putString("sound_disabled", value.joinToString("\n")).apply()
+
     var notificationPermissionAsked: Boolean
         get() = sp.getBoolean("notif_asked", false)
         set(value) = sp.edit().putBoolean("notif_asked", value).apply()

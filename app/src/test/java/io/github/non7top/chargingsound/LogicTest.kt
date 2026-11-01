@@ -40,6 +40,13 @@ class LogicTest {
     }
 
     @Test
+    fun activeSoundsDropsUncheckedOnesAndKeepsOrder() {
+        val saved = listOf("a", "b", "c")
+        assertEquals(listOf("a", "c"), activeSounds(saved, setOf("b", "gone")))
+        assertEquals(emptyList<String>(), activeSounds(saved, saved.toSet()))
+    }
+
+    @Test
     fun pickSourceUsesDefaultWhenNothingSaved() {
         assertEquals(SoundSource.Default, pickSource(emptyList()) { true })
         assertEquals(SoundSource.Default, pickSource(listOf("  ")) { true })

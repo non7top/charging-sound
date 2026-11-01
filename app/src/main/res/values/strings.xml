@@ -10,7 +10,8 @@
     <string name="enable_label">Play a sound when a charger is connected</string>
     <string name="sound_heading">Sound</string>
     <string name="sound_default">System default notification sound</string>
-    <string name="sound_random_hint">One of these is played at random.</string>
+    <string name="sound_random_hint">One of the checked sounds is played at random. With none checked, the default sound plays.</string>
+    <string name="play_sound">Play</string>
     <string name="choose_sound">Add sounds</string>
     <string name="remove_sound">Remove</string>
     <string name="use_default">Clear all</string>
