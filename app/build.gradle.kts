@@ -3,7 +3,7 @@ plugins {
 }
 
 // Bumped by release-please; the version code is derived from it.
-val appVersion = "0.0.0" // x-release-please-version
+val appVersion = "1.0.0" // x-release-please-version
 val (major, minor, patch) = appVersion.split(".").map { it.toInt() }
 
 android {
