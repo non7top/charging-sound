@@ -21,6 +21,13 @@ android {
 
     val keystorePath = System.getenv("CHARGING_SOUND_KEYSTORE")
     signingConfigs {
+        // CI runners generate a new debug key per run, so builds could not update each other.
+        getByName("debug") {
+            storeFile = file("debug.keystore")
+            storePassword = "android"
+            keyAlias = "androiddebugkey"
+            keyPassword = "android"
+        }
         if (keystorePath != null) {
             create("release") {
                 storeFile = file(keystorePath)

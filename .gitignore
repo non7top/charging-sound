@@ -7,6 +7,7 @@
 /signing/
 *.jks
 *.keystore
+!/app/debug.keystore
 *.apk
 *.aab
 .idea/
