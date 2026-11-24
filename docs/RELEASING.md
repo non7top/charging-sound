@@ -6,7 +6,7 @@ Releases are automated with release-please and a signed APK built by the release
 
 1. Merge PRs with Conventional Commit titles into `master`.
 2. release-please keeps a release PR open with the version bump and changelog. Merge it when ready.
-3. Merging creates the tag and GitHub release. The `publish` job in `release-please.yml` calls `release.yml`, which builds the signed APK, verifies it with `apksigner`, attests build provenance, and uploads the APK and `SHA256SUMS` to the release.
+3. Merging creates the tag and GitHub release. The `publish` job in `release-please.yml` calls `release.yml`, which builds the signed APK, verifies it with `apksigner`, attests build provenance, and uploads the APK, its Sigstore bundle (`.apk.sigstore.json`) and `SHA256SUMS` to the release.
 
 To rebuild and re-upload an existing release, run the `charging-sound release` workflow manually with the tag.
 
@@ -47,6 +47,8 @@ ANDROID_KEY_PASSWORD=...
 ```
 sha256sum -c SHA256SUMS
 gh attestation verify charging-sound-vX.Y.Z.apk --repo non7top/charging-sound
+gh attestation verify charging-sound-vX.Y.Z.apk --repo non7top/charging-sound \
+  --bundle charging-sound-vX.Y.Z.apk.sigstore.json
 apksigner verify --print-certs charging-sound-vX.Y.Z.apk
 ```
 

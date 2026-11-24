@@ -85,6 +85,7 @@ jobs:
           sha256sum "charging-sound-${TAG}.apk" | tee SHA256SUMS
 
       - name: Attest build provenance
+        id: attest
         if: ${{ env.PUBLISH == 'true' }}
         uses: actions/attest-build-provenance@v4
         with:
@@ -95,4 +96,7 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
           TAG: ${{ inputs.tag }}
-        run: gh release upload "$TAG" "dist/charging-sound-${TAG}.apk" dist/SHA256SUMS --clobber
+          BUNDLE: ${{ steps.attest.outputs.bundle-path }}
+        run: |
+          cp "$BUNDLE" "dist/charging-sound-${TAG}.apk.sigstore.json"
+          gh release upload "$TAG" "dist/charging-sound-${TAG}.apk" "dist/charging-sound-${TAG}.apk.sigstore.json" dist/SHA256SUMS --clobber
