@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.1](https://github.com/non7top/charging-sound/compare/v1.0.0...v1.0.1) (2026-11-24)
+
+
+### Dependencies
+
+* bump the gradle group with 2 updates ([3d75786](https://github.com/non7top/charging-sound/commit/3d75786ca9e85e14cb2ebffef1865866ac5ca7f3))
+
 ## 1.0.0 (2026-11-01)
 
 
